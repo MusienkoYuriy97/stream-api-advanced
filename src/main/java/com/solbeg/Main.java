@@ -40,7 +40,7 @@ public class Main {
     public List<User> findUsersByBirthdayMonth(Month birthdayMonth) {
         return users.stream()
                 .filter(Objects::nonNull)
-                .filter(user -> user.getBirthDay().getMonth().equals(birthdayMonth))
+                .filter(user -> birthdayMonth.equals(user.getBirthDay().getMonth()))
                 .toList();
     }
 
