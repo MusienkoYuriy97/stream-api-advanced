@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -38,6 +39,7 @@ public class Main {
      */
     public List<User> findUsersByBirthdayMonth(Month birthdayMonth) {
         return users.stream()
+                .filter(Objects::nonNull)
                 .filter(user -> user.getBirthDay().getMonth().equals(birthdayMonth))
                 .toList();
     }
@@ -51,6 +53,7 @@ public class Main {
      */
     public Map<String, List<User>> groupUsersByEmailDomain() {
         return users.stream()
+                .filter(user -> Objects.nonNull(user.getEmail()))
                 .collect(Collectors.groupingBy(user -> user.getEmail().split("@")[1]));
     }
 
@@ -61,7 +64,9 @@ public class Main {
     public BigDecimal calculateTotalBalance() {
         return users.stream()
                 .map(User::getBalance)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal::add)
+                .get();
+        /*.reduce(BigDecimal.ZERO, BigDecimal::add);*/
     }
 
     /**
@@ -79,7 +84,8 @@ public class Main {
      */
     public boolean containsUserWithEmailDomain(String emailDomain) {
         return users.stream()
-                .anyMatch(user -> user.getEmail().split("@")[1].equals(emailDomain));
+                .filter(user -> Objects.nonNull(user.getEmail()))
+                .anyMatch(user -> emailDomain.equals(user.getEmail().split("@")[1]));
     }
 
     /**
@@ -104,7 +110,7 @@ public class Main {
      */
     public Map<Long, User> collectUsersById() {
         return users.stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
+                .collect(Collectors.toMap(User::getId, Function.identity()));
     }
 
 
