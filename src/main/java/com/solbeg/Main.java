@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -38,7 +39,7 @@ public class Main {
      */
     public List<User> findUsersByBirthdayMonth(Month birthdayMonth) {
         return users.stream()
-                .filter(user -> user.getBirthDay().getMonth() == birthdayMonth)
+                .filter(user -> user.getBirthDay() != null && user.getBirthDay().getMonth() == birthdayMonth)
                 .collect(Collectors.toList());
     }
 
@@ -51,6 +52,7 @@ public class Main {
      */
     public Map<String, List<User>> groupUsersByEmailDomain() {
         return users.stream()
+                .filter(user -> user.getEmail()!=null)
                 .collect(Collectors.groupingBy(user -> user.getEmail().substring(user.getEmail().indexOf("@") + 1)));
     }
 
@@ -80,6 +82,7 @@ public class Main {
      */
     public boolean containsUserWithEmailDomain(String emailDomain) {
         return users.stream()
+                .filter(user -> user.getEmail() != null)
                 .anyMatch(user -> user.getEmail().endsWith(emailDomain));
     }
 
@@ -91,14 +94,10 @@ public class Main {
      * @return user balance
      */
     public BigDecimal getBalanceByEmail(String email) {
-        Optional<User> userOptional = users.stream()
-                .filter(user -> Objects.equals(user.getEmail(), email)).findFirst();
-
-        if (userOptional.isPresent()) {
-            return userOptional.get().getBalance();
-        } else {
-            throw new EntityNotFoundException("Cannot find User by email=" + email);
-        }
+        return users.stream()
+                .filter(user -> user.getEmail() != null && Objects.equals(user.getEmail(), email)).findFirst()
+                .map(User::getBalance)
+                .orElseThrow(() -> new EntityNotFoundException("Cannot find User by email=" + email));
     }
 
     /**
@@ -108,7 +107,7 @@ public class Main {
      */
     public Map<Long, User> collectUsersById() {
         return users.stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
+                .collect(Collectors.toMap(User::getId, Function.identity()));
     }
 
 
